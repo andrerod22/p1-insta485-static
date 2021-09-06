@@ -54,3 +54,12 @@
     display:block;
 }
 
+.userProfile{
+    display:inline;
+    position:relative;
+}
+
+.userProfile img{
+    max-width: 45%;
+    max-height: 45%;
+}
