@@ -1,12 +1,8 @@
-from re import X
 import sys
-import os
 import json
 from pathlib import Path
 from distutils.dir_util import copy_tree
-from typing import Any
 import click
-from click.types import BoolParamType
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
 
