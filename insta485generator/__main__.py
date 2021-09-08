@@ -1,8 +1,14 @@
-import click
+from re import X
+import sys
 import os
 import json
-from jinja2 import Environment, PackageLoader, select_autoescape, Template
 from pathlib import Path
+from distutils.dir_util import copy_tree
+from typing import Any
+import click
+from click.types import BoolParamType
+from jinja2 import Environment, PackageLoader, select_autoescape, Template
+
 
 """Build static HTML site from directory of HTML templates and plain files."""
 #    Implement the following in main:
@@ -14,59 +20,67 @@ from pathlib import Path
 #@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 
 @click.command()
+@click.option('-o', '--output', help="Output directory.", type=Path)
+@click.option('-v', '--verbose', help="Print more output.", is_flag=True, type=bool)
 @click.argument('INPUT_DIR', required=True, type=click.Path(exists=True))
-@click.option('-o', '--output', 'PATH', help="Output directory")
-@click.option('-v', '--verbose', help="Print more output")
-
-def main(PATH, verbose, input_dir):
+def main(output, verbose, input_dir):
+    """Templated static website generator."""
+    #ASK: Do we need to lstrip path object types?
+    #Path(output.lstrip("/"))
+    input_path = Path(input_dir)
+    output_root = None if output == None else output
     """ERROR HANDLING"""
+    #input_dir error handled by click
+    #Check if output_dir exists:
+    if output_root and Path.exists(output_root):
+        click.echo("Path already exists")
+        sys.exit(1)
 
+    #Valid Json File:
+
+    #Valid Jinja Template:
+
+    #Valid URL:
 
     """Fetch JSON, URL, & JINJA from input_dir"""
-    #click.echo(input_dir)
-    #print(PATH)
     #load the json data:
-    jsonFile = open(input_dir + "/" + "config.json", "r")
+    #mkae sure to loop through each dictionary!
+    json_dir = input_path/"config.json"
+    jsonFile = open(json_dir)
     data = json.load(jsonFile)
-    #print(data)
-    #load the jinja template:
     env = Environment(
     loader=PackageLoader(input_dir),
     autoescape=select_autoescape(['html', 'xml']))
     template = env.get_template("index.html")
-    #print(template.render(the="variables", go="here"))
     #Extract the url from the json dictionary:
     #Not sure when we are suppose to cut off the forward slash..
-    """Serve JSON & JINJA, to ${input_dir}/url """
-    target = None
-    output_dir = None
+    """Serve JSON & JINJA, to ${input_dir}/url or output_dir"""
     url = data[0]["url"]
     url = url.lstrip("/")
-
-    #Default Pathway:
-    if PATH == None:
-        input_dir = Path(input_dir)
-        output_dir = input_dir/"html"
-        target = output_dir/url/"index.html"
-    #User Defined Pathway:
-    else:
-        PATH = PATH.lstrip("/")
-        PATH = Path(PATH)
-        output_dir = PATH
-        target = output_dir/url/"index.html"
-    #print(output_path)
-    #target_path = input_dir + '/html' if PATH == None else PATH
-    #print(target_path)
+    output_html = input_path/"html" if output_root == None else output_root
+    target = output_html/url/"index.html"
     #Store the jinja Template in the target_path:
     generatedHTML = template.render(data[0].get("context"))
-    #print(htmlOutput)
-    """
-    os.mkdir(output_dir)
-    with open(target, "w") as file:
+    #get an error if I don't put in mode='w'
+    #ASK PIAZZA OR OH
+    #Generate HTML File:
+    #breakpoint()
+    Path.mkdir(output_html)
+    with target.open("w") as file:
         file.write(generatedHTML)
-    """
-    print(output_dir)
-    print(target)
+    #Check if INPUT_DIR has a static folder:
+    cssPath = input_path/"static"/"css"
+    if Path.exists(cssPath):
+        Path.mkdir(output_html/"css")
+        if Path.exists(cssPath/"style.css"):
+            Path(output_html/"css"/"style.css").touch()
+            copy_tree(str(cssPath), str(output_html/"css"))
+    
+    #If verbose enabled print state of index & static:
+    if verbose:
+        click.echo("Copied" + " " + input_dir + "/" + "static" + " -> " + str(output_html))
+        click.echo("Rendered index.html -> " + str(target))
+
 
 if __name__ == "__main__":
     main()
