@@ -25,12 +25,14 @@ def main(output, verbose, input_dir):
     #Path(output.lstrip("/"))
     input_path = Path(input_dir)
     output_root = None if output == None else output
-    """ERROR HANDLING"""
-    #input_dir error handled by click
-    #Check if output_dir exists:
     if output_root and Path.exists(output_root):
         click.echo("Path already exists")
         sys.exit(1)
+    
+    """ERROR HANDLING"""
+    #input_dir error handled by click
+
+    #Check if output_dir exists:
 
     #Valid Json File:
 
@@ -38,44 +40,53 @@ def main(output, verbose, input_dir):
 
     #Valid URL:
 
+
     """Fetch JSON, URL, & JINJA from input_dir"""
     #load the json data:
     #mkae sure to loop through each dictionary!
-    json_dir = input_path/"config.json"
-    jsonFile = open(json_dir)
-    data = json.load(jsonFile)
     env = Environment(
     loader=PackageLoader(input_dir),
     autoescape=select_autoescape(['html', 'xml']))
-    template = env.get_template("index.html")
+    json_dir = input_path/"config.json"
+    jsonFile = open(json_dir)
+    data = json.load(jsonFile)
+    output_html = input_path/"html" if output_root == None else output_root
+    Path.mkdir(output_html, parents=True)
+    cssPath = input_path/"static"
+    if Path.exists(cssPath):
+        copy_tree(str(cssPath), str(output_html))
+        if verbose:
+            click.echo("Copied" + " " + input_dir + "/" + "static" + " -> " + str(output_html))
+
+    for dict in data:
+        url = dict["url"]
+        url = url.lstrip("/")
+        templateInput = dict["template"]
+        templateInput = templateInput.lstrip("/")
+        contextInput = dict["context"]
+        template = env.get_template(templateInput)
+        generatedHTML = template.render(contextInput)
+        target = output_html/url/"index.html"
+        #breakpoint()
+        if not Path.exists(output_html/url):
+            Path.mkdir(output_html/url, parents=True)
+        with target.open("w") as file:
+            file.write(generatedHTML)
+            if verbose:
+                click.echo("Rendered " + dict["template"] + " -> " + str(target))
+        
+    jsonFile.close()
+
     #Extract the url from the json dictionary:
     #Not sure when we are suppose to cut off the forward slash..
     """Serve JSON & JINJA, to ${input_dir}/url or output_dir"""
-    url = data[0]["url"]
-    url = url.lstrip("/")
-    output_html = input_path/"html" if output_root == None else output_root
-    target = output_html/url/"index.html"
+    #url = data[0]["url"]
+    #url = url.lstrip("/")
     #Store the jinja Template in the target_path:
-    generatedHTML = template.render(data[0].get("context"))
+    #generatedHTML = template.render(contextInput)
     #get an error if I don't put in mode='w'
     #ASK PIAZZA OR OH
     #Generate HTML File:
-    #breakpoint()
-    Path.mkdir(output_html)
-    with target.open("w") as file:
-        file.write(generatedHTML)
-    #Check if INPUT_DIR has a static folder:
-    cssPath = input_path/"static"/"css"
-    if Path.exists(cssPath):
-        Path.mkdir(output_html/"css")
-        if Path.exists(cssPath/"style.css"):
-            Path(output_html/"css"/"style.css").touch()
-            copy_tree(str(cssPath), str(output_html/"css"))
-    
-    #If verbose enabled print state of index & static:
-    if verbose:
-        click.echo("Copied" + " " + input_dir + "/" + "static" + " -> " + str(output_html))
-        click.echo("Rendered index.html -> " + str(target))
 
 
 if __name__ == "__main__":
