@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# insta485test
+#
+# See p1 spec insta485test script
+#
+# Andre Rodriguez <andrerod@umich.edu>
+
+set -Eeuo pipefail
+set -x
+# 1. Stops on Errors and Print Commands
+#Piazza:question @404
+# 2. Runs all unit tests using pytest_tests/
+pytest tests/
+# 3. 
+pycodestyle insta485generator
+# 4.
+pydocstyle insta485generator
+# 5.
+pylint --disable=no-value-for-parameter setup.py insta485generator
+# 6. Clean
+rm -rf insta485/html
+# 7. Build
+insta485generator insta485
+# 8. Validate hand-coded HTML
+html5validator (html5validator --ignore JAVA_TOOL_OPTIONS --root html)
+# 9. Validate generated HTML
+html5validator (html5validator --ignore JAVA_TOOL_OPTIONS --root insta485/html)
