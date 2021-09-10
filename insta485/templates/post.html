@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <![endif]-->
 <html>
     <head>
         <meta charset="utf-8">
@@ -33,7 +29,7 @@
         <div class="profilePost">
             <div class="profileTopBar">
                 <a href="/u/{{owner}}/">
-                    <img src="{{owner_img_url}}">
+                    <img src="{{owner_img_url}}" alt="tyrell-wellick.jpg">
                     <span style="font-weight:bold">{{owner}}</span>
                 </a>
                 <a href="/p/{{postid}}/">
@@ -41,7 +37,7 @@
                 </a>
             </div>
             <div class="postImg">
-                <img src="{{img_url}}">
+                <img src="{{img_url}}" alt="dom-diperro.jpg">
             </div>
             <div class="profileBottomBar">
                 {% if likes == 1 %}
@@ -54,6 +50,5 @@
                 {% endfor %}
             </div>
         </div>
-        <script src="" async defer></script>
-    </body>
+     </body>
 </html>
