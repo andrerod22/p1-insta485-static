@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from distutils.dir_util import copy_tree
 import click
-from jinja2 import Environment, PackageLoader, select_autoescape, Template
+from jinja2 import Environment, PackageLoader, select_autoescape, Template, FileSystemLoader
 
 
 """Build static HTML site from directory of HTML templates and plain files."""
@@ -44,9 +44,17 @@ def main(output, verbose, input_dir):
     """Fetch JSON, URL, & JINJA from input_dir"""
     #load the json data:
     #mkae sure to loop through each dictionary!
+    '''
+    template_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(str(template_dir)),
+    autoescape=jinja2.select_autoescape(['html', 'xml']),
+)
+    input_dir/"templates"
+    '''
+    templates_dir = input_path/"templates"
     env = Environment(
-    loader=PackageLoader(input_dir),
-    autoescape=select_autoescape(['html', 'xml']))
+    loader=FileSystemLoader(str(templates_dir)),
+    autoescape=select_autoescape(['html', 'xml']),)
     json_dir = input_path/"config.json"
     jsonFile = open(json_dir)
     data = json.load(jsonFile)
@@ -91,3 +99,5 @@ def main(output, verbose, input_dir):
 
 if __name__ == "__main__":
     main()
+
+
