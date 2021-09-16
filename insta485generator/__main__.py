@@ -23,21 +23,13 @@ def main(output, verbose, input_dir):
     if output_root and Path.exists(output_root):
         click.echo("Path already exists")
         sys.exit(1)
-    # input_dir error handled by click
-    # Check if output_dir exists:
-    # Valid Json File:
-    # Valid Jinja Template:
-    # Fetch JSON, URL, & JINJA from input_dir
-    # templates_dir = input_path/"templates"
     env = Environment(
         loader=FileSystemLoader(str(input_path/"templates")),
         autoescape=select_autoescape(['html', 'xml']),)
-    # json_dir = input_path/"config.json"
     with open(input_path/"config.json") as json_file:
         data = json.load(json_file)
         output_html = input_path/"html" if output_root is None else output_root
         Path.mkdir(output_html, parents=True)
-        # css_path = input_path/"static"
         if Path.exists(input_path/"static"):
             copy_tree(str(input_path/"static"), str(output_html))
             if verbose:
